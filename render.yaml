@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: kickoff-log
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python seed.py && gunicorn app:app"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kickoff-log-db
+          property: connectionString
+
+databases:
+  - name: kickoff-log-db
+    plan: free
