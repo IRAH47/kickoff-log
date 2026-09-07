@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Kickoff Log{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a href="{{ url_for('index') }}" class="brand"><span class="e">e</span>Kickoff Log</a>
+      <form class="search" action="{{ url_for('index') }}" method="get">
+        <input type="text" name="q" placeholder="Search seasons…" value="{{ request.args.get('q', '') }}">
+      </form>
+      <div class="nav-links">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('profile', username=current_user.username) }}">{{ current_user.username }}</a>
+          <a href="{{ url_for('logout') }}">Log out</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Log in</a>
+          <a href="{{ url_for('register') }}" class="btn ghost" style="padding:7px 14px;">Sign up</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="flash {{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <footer>
+    <div class="wrap">
+      Kickoff Log — an unofficial fan-made review log for eFootball seasons. Not affiliated with Konami. &copy; {{ current_year }}
+    </div>
+  </footer>
+</body>
+</html>

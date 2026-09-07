@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ edition.title }} — Kickoff Log{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="edition-header">
+    <div class="poster-art" style="background: linear-gradient(160deg, {{ edition.accent }}55, {{ edition.accent }}15), var(--pitch-200);">
+      <div class="poster-year">{{ edition.season_year }}</div>
+    </div>
+    <div>
+      <h1>{{ edition.title }}</h1>
+      <div class="edition-meta">
+        {% if edition.release_date %}<span><strong>Released</strong> {{ edition.release_date.strftime('%d %b %Y') }}</span>{% endif %}
+        <span><strong>Developer</strong> {{ edition.developer }}</span>
+        {% if edition.engine %}<span><strong>Engine</strong> {{ edition.engine }}</span>{% endif %}
+        {% if edition.platforms %}<span><strong>Platforms</strong> {{ edition.platforms }}</span>{% endif %}
+      </div>
+      <p class="edition-synopsis">{{ edition.synopsis }}</p>
+
+      <div class="rating-summary">
+        {% set avg = edition.average_rating %}
+        <div class="rating-big" style="color: {% if avg and avg >= 7 %}var(--good){% elif avg and avg >= 5 %}var(--mid){% elif avg %}var(--poor){% else %}var(--ink-dim){% endif %};">
+          {{ avg if avg else '—' }}<small> / 10</small>
+        </div>
+        <div class="rating-count">{{ edition.reviews.count() }} review{{ 's' if edition.reviews.count() != 1 else '' }}</div>
+        {% if current_user.is_authenticated %}
+          <a class="btn" href="{{ url_for('write_review', slug=edition.slug) }}">
+            {{ 'Edit your review' if my_review else 'Rate & review' }}
+          </a>
+        {% else %}
+          <a class="btn ghost" href="{{ url_for('login', next=url_for('write_review', slug=edition.slug)) }}">Log in to review</a>
+        {% endif %}
+      </div>
+
+      {% set dist = edition.rating_distribution %}
+      {% set maxcount = dist.values() | max %}
+      <div class="dist">
+        {% for score in range(1, 11) %}
+          <div class="dist-bar" title="{{ score }}: {{ dist[score] }}" style="height: {{ (dist[score] / maxcount * 100) if maxcount else 0 }}%;"></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head"><h2>Reviews</h2></div>
+  {% if reviews %}
+    {% for r in reviews %}
+      <div class="review">
+        <div>
+          {% if r.rating >= 7 %}<span class="badge good">{{ r.rating }}<span class="of10">/10</span></span>
+          {% elif r.rating >= 5 %}<span class="badge mid">{{ r.rating }}<span class="of10">/10</span></span>
+          {% else %}<span class="badge poor">{{ r.rating }}<span class="of10">/10</span></span>{% endif %}
+        </div>
+        <div>
+          <a class="review-user underline-link" href="{{ url_for('profile', username=r.author.username) }}">{{ r.author.username }}</a>
+          <span class="review-date">played {{ r.played_on.strftime('%b %Y') }} · reviewed {{ r.created_at.strftime('%d %b %Y') }}</span>
+          {% if r.body %}<div class="review-body">{{ r.body }}</div>{% endif %}
+          {% if current_user.is_authenticated and current_user.id == r.user_id %}
+          <div class="review-actions">
+            <a href="{{ url_for('write_review', slug=edition.slug) }}">Edit</a>
+            <form method="post" action="{{ url_for('delete_review', review_id=r.id) }}" onsubmit="return confirm('Delete this review?');">
+              <button type="submit" class="link">Delete</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">No reviews yet — be the first to rate this season.</div>
+  {% endif %}
+</div>
+{% endblock %}

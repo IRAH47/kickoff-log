@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Review {{ edition.title }} — Kickoff Log{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="auth-card" style="max-width: 520px;">
+    <h1 style="font-size:1.4rem;">{{ 'Edit your review of' if review else 'Rate' }} {{ edition.title }}</h1>
+
+    <form method="post">
+      <div class="field">
+        <label for="rating">Match rating (1.0 – 10.0)</label>
+        <div class="score-input">
+          <input type="number" id="rating" name="rating" min="1" max="10" step="0.1"
+                 value="{{ draft.rating if draft else (review.rating if review else '') }}" required>
+          <span class="score-hint">Like a post-match player rating — be honest.</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="played_on">When did you mainly play this season?</label>
+        <input type="date" id="played_on" name="played_on"
+               value="{{ draft.played_on if draft else (review.played_on.isoformat() if review else '') }}">
+      </div>
+
+      <div class="field">
+        <label for="body">Review</label>
+        <textarea id="body" name="body" placeholder="How was the gameplay, myClub, servers, licensing…?">{{ draft.body if draft else (review.body if review else '') }}</textarea>
+      </div>
+
+      <button class="btn" type="submit">{{ 'Update review' if review else 'Post review' }}</button>
+      <a class="btn ghost" href="{{ url_for('edition_detail', slug=edition.slug) }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

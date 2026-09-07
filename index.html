@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Kickoff Log — log and rate every eFootball season{% endblock %}
+{% block content %}
+<div class="hero">
+  <div class="wrap">
+    <h1>Log the seasons you've played.<br>Rate every update.</h1>
+    <p class="tag">Track eFootball releases the way footballers get rated after a match — out of 10, with a proper writeup. Browse seasons, leave your score, and see what everyone else made of this year's Master League.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  {% if q %}
+    <div class="section-head"><h2>Results for "{{ q }}"</h2></div>
+  {% else %}
+    <div class="section-head"><h2>All seasons</h2></div>
+  {% endif %}
+
+  {% if editions %}
+  <div class="grid">
+    {% for e in editions %}
+      <a class="poster" href="{{ url_for('edition_detail', slug=e.slug) }}">
+        <div class="poster-art" style="background: linear-gradient(160deg, {{ e.accent }}55, {{ e.accent }}15), var(--pitch-200);">
+          <div class="poster-year">{{ e.season_year }}</div>
+          <div class="poster-title">{{ e.title }}</div>
+          {% if e.average_rating %}
+            <div class="poster-rating">{{ e.average_rating }} / 10 · {{ e.reviews.count() }} review{{ 's' if e.reviews.count() != 1 else '' }}</div>
+          {% else %}
+            <div class="poster-rating">No reviews yet</div>
+          {% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="empty-state">No seasons match "{{ q }}".</div>
+  {% endif %}
+
+  {% if recent_reviews %}
+  <div class="section-head"><h2>Recent reviews</h2></div>
+  <div>
+    {% for r in recent_reviews %}
+      <div class="review">
+        <div>
+          {% if r.rating >= 7 %}<span class="badge good">{{ r.rating }}<span class="of10">/10</span></span>
+          {% elif r.rating >= 5 %}<span class="badge mid">{{ r.rating }}<span class="of10">/10</span></span>
+          {% else %}<span class="badge poor">{{ r.rating }}<span class="of10">/10</span></span>{% endif %}
+        </div>
+        <div>
+          <a class="review-user underline-link" href="{{ url_for('profile', username=r.author.username) }}">{{ r.author.username }}</a>
+          on <a class="underline-link" href="{{ url_for('edition_detail', slug=r.edition.slug) }}">{{ r.edition.title }}</a>
+          <div class="review-date">{{ r.created_at.strftime('%d %b %Y') }}</div>
+          {% if r.body %}<div class="review-body">{{ r.body[:220] }}{% if r.body|length > 220 %}…{% endif %}</div>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
